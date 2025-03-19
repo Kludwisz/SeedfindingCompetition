@@ -247,7 +247,7 @@ public class SeedList {
         /**
          * @return the i-th chunk position in the entry.
          * @throws IndexOutOfBoundsException if the entry contains less than i-1 chunk positions.
-         * @throws ArithmeticException if the resulting values are too large to be chunk positions.
+         * @throws ArithmeticException if the stored values are too large to be chunk coordinates.
          */
         public CPos getChunkPos(int i) {
             int ix = chunkIndices.get(i);
@@ -260,7 +260,7 @@ public class SeedList {
         /**
          * @return the i-th block position in the entry.
          * @throws IndexOutOfBoundsException if the entry contains less than i-1 block positions.
-         * @throws ArithmeticException if the resulting values are too large to be chunk positions.
+         * @throws ArithmeticException if the stored values are too large to be block coordinates.
          */
         public BPos getBlockPos(int i) {
             int ix = blockIndices.get(i);
