@@ -8,6 +8,7 @@ version = '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
     maven { url "https://maven.seedfinding.com" }
+    maven { url "https://repo.jellejurre.dev" }
     maven { url "https://maven.latticg.com/" }
     maven { url "https://jitpack.io" }
 }
@@ -30,6 +31,9 @@ dependencies {
     implementation('com.github.kludwisz:TrialChamberGenerator:v1.3-mc_1.21.4') { transitive = false }
     implementation('com.github.kludwisz:BastionGenerator:f2bddf8') { transitive = false }
     implementation files('libs/MansionGenerator.jar') // compiled from https://github.com/Xinyuuu7/MansionGenerator
+    implementation files('libs/StrongholdGenerator.jar') // from private sources
+
+    implementation 'com.github.KalleStruik:noise-sampler:1.20.0'
 
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.7.2')
