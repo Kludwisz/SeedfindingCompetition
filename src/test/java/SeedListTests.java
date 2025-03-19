@@ -51,4 +51,16 @@ public class SeedListTests {
 
         assertTrue(list.toFile("src/test/resources/test_seedlist_out.txt"));
     }
+
+    @Test
+    public void testListOperations() {
+        SeedList list1 = SeedList.fromFile("src/test/resources/test_seedlist_2A.txt", SeedList.EntryFormat.SEED, SeedList.EntryFormat.CHUNK_POS);
+        SeedList list2 = SeedList.fromFile("src/test/resources/test_seedlist_2B.txt", SeedList.EntryFormat.SEED, SeedList.EntryFormat.INTEGER);
+
+        SeedList list3 = list1.filterSeeds(list2).flatten();
+
+        assertEquals(3, list3.getEntries().size());
+
+        assertTrue(list3.toFile("src/test/resources/test_seedlist_2_out.txt"));
+    }
 }
