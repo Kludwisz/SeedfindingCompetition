@@ -4,6 +4,7 @@ import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.util.math.Vec3i;
 import com.seedfinding.mccore.util.pos.CPos;
 
+@SuppressWarnings("unused")
 public class Formatter {
     public static String tpCommand(CPos chunkPos, int y, Dimension dimension) {
         return String.format("/execute in minecraft:%s run tp @p %d %d %d", dimension.getName(), chunkPos.getX() * 16, y, chunkPos.getZ() * 16);

@@ -3,6 +3,7 @@ package kludwisz.data;
 import java.io.FileWriter;
 import java.io.IOException;
 
+@SuppressWarnings("unused")
 public class FileOutput {
     public static synchronized void appendToFile(String filename, String text) {
         try {
