@@ -135,7 +135,7 @@ public class SeedList {
             Scanner fin = new Scanner(new File(filename));
             SeedList result = new SeedList(formatSequence);
 
-            while (fin.hasNextLine()) {
+            while (fin.hasNextLong()) {
                 String line = fin.nextLine();
                 List<Long> entry = new ArrayList<>();
                 for (String s : line.split(" ")) {
@@ -145,6 +145,7 @@ public class SeedList {
             }
 
             fin.close();
+            return result;
         }
         catch (Exception ignored) {}
         return null;
@@ -167,6 +168,7 @@ public class SeedList {
             }
 
             fout.close();
+            return true;
         }
         catch (Exception ignored) {}
         return false;

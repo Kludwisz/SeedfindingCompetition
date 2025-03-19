@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SeedListTests {
     @Test
@@ -36,5 +35,20 @@ public class SeedListTests {
 
         assertThrows(IndexOutOfBoundsException.class, () -> seedList.getEntry(3));
         assertThrows(IndexOutOfBoundsException.class, () -> seedList.getEntry(1).getInteger(1));
+    }
+
+    @Test
+    public void testFileIO() {
+        List<SeedList.EntryFormat> format = List.of(SeedList.EntryFormat.BLOCK_POS, SeedList.EntryFormat.SEED, SeedList.EntryFormat.CHUNK_POS);
+        SeedList list = SeedList.fromFile("src/test/resources/test_seedlist.txt", format);
+        assertNotNull(list);
+        assertEquals(4, list.getEntries().size());
+
+        for (int i = 0; i < 4; i++) {
+            assertEquals(i, list.getEntry(i).getChunkPos(0).getX());
+            assertEquals(i, list.getEntry(i).getChunkPos(0).getZ());
+        }
+
+        assertTrue(list.toFile("src/test/resources/test_seedlist_out.txt"));
     }
 }
