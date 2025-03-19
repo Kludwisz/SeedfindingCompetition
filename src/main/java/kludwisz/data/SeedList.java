@@ -11,6 +11,7 @@ import java.util.*;
 public class SeedList {
     private final ArrayList<Entry> entries = new ArrayList<>();
     private final List<EntryFormat> formatSequence;
+    private int entrySize;
 
     /**
      * Creates a new, flat SeedList with the default format sequence (only the seed).
@@ -60,7 +61,7 @@ public class SeedList {
      * @param entry the entry to add.
      */
     public void addEntry(List<Long> entry) {
-        if (entry.size() != this.formatSequence.size()) {
+        if (entry.size() != this.entrySize) {
             throw new IllegalArgumentException("Entry size does not match format sequence size");
         }
         this.entries.add(new Entry(entry));
@@ -211,6 +212,7 @@ public class SeedList {
                     break;
             }
         }
+        this.entrySize = ix;
     }
 
     /**

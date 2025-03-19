@@ -26,6 +26,9 @@ dependencies {
     implementation group: 'it.unimi.dsi', name: 'fastutil-core', version: '8.5.13'
 
     // TODO add all the structure generators
+
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.7.2')
 }
 
 test {
