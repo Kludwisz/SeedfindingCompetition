@@ -156,9 +156,9 @@ public class SeedList {
      * @param filename the name of the file to write to.
      * @return true if the operation was successful, false otherwise.
      */
-    public boolean toFile(String filename) {
+    public boolean toFile(String filename, boolean append) {
         try {
-            FileWriter fout = new FileWriter(filename);
+            FileWriter fout = new FileWriter(filename, append);
 
             for (Entry entry : this.entries) {
                 for (long value : entry.values) {
@@ -172,6 +172,14 @@ public class SeedList {
         }
         catch (Exception ignored) {}
         return false;
+    }
+
+    public boolean toFile(String filename) {
+        return toFile(filename, false);
+    }
+
+    public boolean appendToFile(String s) {
+        return toFile(s, true);
     }
 
 
