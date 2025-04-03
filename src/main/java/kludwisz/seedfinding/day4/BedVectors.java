@@ -9,7 +9,7 @@ import java.util.EnumMap;
 public class BedVectors {
     public static final EnumMap<BlockRotation, BPos> VECS = new EnumMap<>(BlockRotation.class);
 
-    public static BPos getVectorFor(BlockRotation rotation) {
+    public static BPos getIntersection3Vector(BlockRotation rotation) {
         return VECS.get(rotation);
     }
 
