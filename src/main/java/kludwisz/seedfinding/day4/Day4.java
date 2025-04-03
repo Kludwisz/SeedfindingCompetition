@@ -1,5 +1,6 @@
 package kludwisz.seedfinding.day4;
 
+import com.seedfinding.mcmath.util.Mth;
 import kludwisz.data.SeedList;
 
 import java.util.List;
@@ -23,16 +24,30 @@ public class Day4 {
     }
 
     public static void main(String[] args) {
-        final long taskSize = 100_000_000L;
+        final long taskSize = 1_000_000_000L;
 
-        for (long task = 0; task < 20; task++) {
+        List<Long> ss = List.of(2251518389664821737L & Mth.MASK_48, 29435511253L);
+        ss.forEach(r -> {
+            SeedList list = new SeedList();
+
+            LongStream.range(0L, 65536L)
+                    .map(upper -> (upper << 48) | r)
+                    .forEach(worldSeed -> list.addEntry(List.of(worldSeed)));
+
+            list.appendToFile("src/main/resources/day4_F.txt");
+        });
+
+        if (true)
+            return;
+
+        for (long task = 260L; task < 1000L; task++) {
             System.out.println("running task " + task);
             List<HalfBedFinder.Result> results = HalfBedFinder.run2(task * taskSize, (task+1) * taskSize);
 
             results.forEach(r -> {
                 SeedList list = new SeedList();
 
-                LongStream.range(0L, 65536L)
+                LongStream.range(0L, 8000L)
                         .map(upper -> (upper << 48) | r.structureSeed())
                         .forEach(worldSeed -> list.addEntry(List.of(worldSeed)));
 

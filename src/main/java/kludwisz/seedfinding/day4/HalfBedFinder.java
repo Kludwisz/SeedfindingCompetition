@@ -131,11 +131,10 @@ public class HalfBedFinder {
 
         // filter positions inside -1, 0 for arbitrary close trial chambers and ancient city
         CPos tc_10 = chambers.getInRegion(seed, -1, 0, rand);
-        if (tc_10.distanceTo(tc_00, DistanceMetric.CHEBYSHEV) > 20)
+        if (tc_10.distanceTo(tc_00, DistanceMetric.CHEBYSHEV) > 22)
             return;
-
         CPos ac_10 = city.getInRegion(seed, -1, 0, rand);
-        if (tc_10.distanceTo(ac_10, DistanceMetric.MANHATTAN) < 2 || tc_10.distanceTo(ac_10, DistanceMetric.EUCLIDEAN) > 4)
+        if (tc_10.distanceTo(ac_10, DistanceMetric.EUCLIDEAN) < 3 || tc_10.distanceTo(ac_10, DistanceMetric.EUCLIDEAN) > 7)
             return;
 
         // now comes the hard part. need to filter city layout for the hard cluster and just check if
