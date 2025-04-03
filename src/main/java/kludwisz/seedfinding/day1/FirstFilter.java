@@ -35,9 +35,13 @@ public class FirstFilter implements Runnable {
         // iterate over region coords
         for (int rx = regionMin.getX(); rx <= regionMax.getX(); rx++) {
             for (int rz = regionMin.getZ(); rz <= regionMax.getZ(); rz++) {
-                if (this.testRegion2(rx, rz)) { // TODO watch out! alternate method used
-                    ResultCollector.addResult(new Result(rx, rz, worldseed));
+                if (this.testRegion(rx, rz)) {
+                    ResultCollector.addResult(new Result(rx, rz));
                 }
+//                BPos clusterCenter = this.testRegion2(rx, rz);
+//                if (clusterCenter != null) {
+//                    ResultCollector.addResult2(new Result2(clusterCenter));
+//                }
             }
         }
         System.out.printf("Task #%d finished.\n", Day1.completed.incrementAndGet());
@@ -52,22 +56,27 @@ public class FirstFilter implements Runnable {
 
     private boolean testRegion(int regionX, int regionZ) {
         CPos chambers = TC.getInRegion(worldseed, regionX, regionZ, rand);
-        RPos acr = chambers.toRegionPos(AC.getSpacing());
-        CPos ac = AC.getInRegion(worldseed, acr.getX(), acr.getZ(), rand);
-        if (ac.distanceTo(chambers, DistanceMetric.CHEBYSHEV) > 3 || ac.distanceTo(chambers, DistanceMetric.EUCLIDEAN) <= 2)
-            return false;
+        rand.setCarverSeed(worldseed, chambers.getX(), chambers.getZ(), version);
+        rand.nextInt(21); // y value
+        Vec3i startPieceRotationVector = rand.getRandom(BlockRotation.values()).getDirection().getVector();
+        CPos center = new CPos(chambers.getX() + startPieceRotationVector.getX() * 2, chambers.getZ() + startPieceRotationVector.getZ() * 2);
+
+//        RPos acr = chambers.toRegionPos(AC.getSpacing());
+//        CPos ac = AC.getInRegion(worldseed, acr.getX(), acr.getZ(), rand);
+//        if (ac.distanceTo(chambers, DistanceMetric.CHEBYSHEV) > 3 || ac.distanceTo(chambers, DistanceMetric.EUCLIDEAN) <= 2)
+//            return false;
 
         // check for nearby mineshaft (decently fast)
         ArrayList<CPos> mineshafts = new ArrayList<>();
-        for (int dx = -4; dx <= 4; dx++) {
-            for (int dz = -4; dz <= 4; dz++) {
-                rand.setCarverSeed(worldseed, chambers.getX()+dx, chambers.getZ()+dz, version);
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dz = -3; dz <= 3; dz++) {
+                rand.setCarverSeed(worldseed, center.getX()+dx, center.getZ()+dz, version);
                 if (rand.nextDouble() < 0.004D) {
-                    mineshafts.add(new CPos(chambers.getX()+dx, chambers.getZ()+dz));
+                    mineshafts.add(new CPos(center.getX()+dx, center.getZ()+dz));
                 }
             }
         }
-        if (mineshafts.isEmpty())
+        if (mineshafts.size() < 3)
             return false;
         // we should have eliminated nearly 72% of seeds by now
 
@@ -92,7 +101,7 @@ public class FirstFilter implements Runnable {
                         continue;
                     if (c1.getFirst().getX() == c2.getFirst().getX()
                         && c1.getFirst().getZ() == c2.getFirst().getZ()
-                        && c1.getFirst().getY() <= -20
+                        && c1.getFirst().getY() <= 0
                         && Math.abs(c1.getFirst().getY() - c2.getFirst().getY()) <= 6
                     )
                         return true;
@@ -102,26 +111,26 @@ public class FirstFilter implements Runnable {
         return false;
     }
 
-    private boolean testRegion2(int regionX, int regionZ) {
+    private BPos testRegion2(int regionX, int regionZ) {
         CPos chambers = TC.getInRegion(worldseed, regionX, regionZ, rand);
 
         // check for nearby mineshaft around chamber center (decently fast)
         rand.setCarverSeed(worldseed, chambers.getX(), chambers.getZ(), version);
         rand.nextInt(21); // y value
         Vec3i startPieceRotationVector = rand.getRandom(BlockRotation.values()).getDirection().getVector();
-        CPos center = new CPos(chambers.getX() + startPieceRotationVector.getX(), chambers.getZ() + startPieceRotationVector.getZ());
+        CPos center = new CPos(chambers.getX() + startPieceRotationVector.getX() * 2, chambers.getZ() + startPieceRotationVector.getZ() * 2);
 
         ArrayList<CPos> mineshafts = new ArrayList<>();
-        for (int dx = -3; dx <= 3; dx++) {
-            for (int dz = -3; dz <= 3; dz++) {
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
                 rand.setCarverSeed(worldseed, center.getX()+dx, center.getZ()+dz, version);
                 if (rand.nextDouble() < 0.004D) {
                     mineshafts.add(new CPos(chambers.getX()+dx, chambers.getZ()+dz));
                 }
             }
         }
-        if (mineshafts.size() < 2)
-            return false;
+        if (mineshafts.size() != 1)
+            return null;
         // we should have eliminated nearly 72% of seeds by now
 
         // generate both the trial chambers and the mineshafts and check for possible double chest arrangement
@@ -135,23 +144,44 @@ public class FirstFilter implements Runnable {
 //                    chestCounts.putIfAbsent(new CPos(pos.getX(), pos.getZ()), 0);
 //                });
 
-        ArrayList<BPos> allChests = new ArrayList<>();
-        for (CPos ms : mineshafts) {
-            mgen.generateMineshaft(worldseed, ms, false);
-            mgen.getAllChests(worldseed).stream().map(Pair::getFirst).forEach(allChests::add);
-        }
+        // check if triple chest is even possible (should be a nice speedup)
+//        CPos ms = mineshafts.get(0);
+//        mgen.generateMineshaft(worldseed, ms, false);
+//        ArrayList<BPos> possibleChests = new ArrayList<>();
+//        mgen.getCorridors().stream()
+//                .filter (c -> c.boundingBox.minY < 0)
+//                .forEach(c -> c.addPossibleChestPositions(possibleChests));
+//
+//        boolean isPossible = false;
+//        for (BPos centralChest : possibleChests) {
+//            ArrayList<BPos> cluster = new ArrayList<>();
+//            cluster.add(centralChest);
+//            for (BPos chest : possibleChests) {
+//                if (centralChest.getX() - chest.getX() == 0
+//                        && centralChest.getZ() - chest.getZ() == 0
+//                        && Math.abs(centralChest.getY() - chest.getY()) <= 12)
+//                    cluster.add(chest);
+//            }
+//            if (cluster.size() < 3)
+//                continue;
+//            isPossible = true;
+//            break;
+//        }
+//        if (!isPossible) return null;
 
-        // try grouping the chests into clusters and check for 4+ chests in a cluster
+        List<BPos> allChests = mgen.getAllChests(worldseed).stream().map(Pair::getFirst).toList();
+
+        // try grouping the chests into clusters and check for triple chests in a cluster
         for (BPos centralChest : allChests) {
             ArrayList<BPos> cluster = new ArrayList<>();
             cluster.add(centralChest);
             for (BPos chest : allChests) {
-                if (Math.abs(centralChest.getX() - chest.getX()) <= 2
-                        && Math.abs(centralChest.getZ() - chest.getZ()) <= 2
+                if (centralChest.getX() - chest.getX() == 0
+                        && centralChest.getZ() - chest.getZ() == 0
                         && Math.abs(centralChest.getY() - chest.getY()) <= 12)
                     cluster.add(chest);
             }
-            if (cluster.size() < 4)
+            if (cluster.size() < 3)
                 continue;
 
             // calculate cluster bounding box and check its span
@@ -160,12 +190,14 @@ public class FirstFilter implements Runnable {
                 bb.encompass(new BlockBox(chest, chest));
             }
 
-            if (bb.getYSpan() <= 12 && bb.getXSpan() <= 2 && bb.getZSpan() <= 2)
-                return true;
+            if (bb.getYSpan() <= 12 && bb.getXSpan() <= 1 && bb.getZSpan() <= 1) {
+                return new BPos(bb.getCenter());
+            }
         }
 
-        return false;
+        return null;
     }
 
-    public record Result(long regionX, long regionZ, long seed) {}
+    public record Result(long regionX, long regionZ) {}
+    public record Result2(BPos pos) {}
 }
