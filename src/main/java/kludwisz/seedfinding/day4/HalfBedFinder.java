@@ -1,15 +1,17 @@
 package kludwisz.seedfinding.day4;
 
 import com.seedfinding.mccore.rand.ChunkRand;
+import com.seedfinding.mccore.state.Dimension;
 import com.seedfinding.mccore.util.block.BlockRotation;
 import com.seedfinding.mccore.util.math.DistanceMetric;
 import com.seedfinding.mccore.util.math.Vec3i;
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
+import com.seedfinding.mcfeature.structure.Igloo;
+import com.seedfinding.mcfeature.structure.RuinedPortal;
 import kludwisz.ancientcity.AncientCity;
 import kludwisz.ancientcity.AncientCityGenerator;
 import kludwisz.generator.TrialChambersGenerator;
-import kludwisz.generator.TrialChambersPieces;
 import kludwisz.structure.TrialChambers;
 
 import java.util.ArrayList;
@@ -23,6 +25,9 @@ public class HalfBedFinder {
     private static final AncientCityGenerator acgen = new AncientCityGenerator();
     private static final AncientCity city = new AncientCity(VERSION);
     private static final TrialChambers chambers = new TrialChambers(VERSION);
+    private static final NewVillage village = new NewVillage(VERSION);
+    private static final Igloo igloo = new Igloo(VERSION);
+    private static final RuinedPortal portal = new RuinedPortal(Dimension.OVERWORLD, VERSION);
     private static final ChunkRand rand = new ChunkRand();
 
     public static List<Result> run(long start, long end) {
@@ -101,6 +106,7 @@ public class HalfBedFinder {
     // iteration 2 of the finder
 
     private static boolean filterStructurePos(CPos tc, CPos ac) {
+        if (tc.getX() > 15) return false;
         int dx = tc.getX() - ac.getX(); // delta goes from ac to tc
         int dz = tc.getZ() - ac.getZ();
         return (dx == 6 && dz == -1) || (dx == -5 && dz == -3);
@@ -120,22 +126,29 @@ public class HalfBedFinder {
     public static void checkStructureSeed2(long seed, ArrayList<Result> results) {
         // filter positions of tc and ac within the 0,0 region for the hard cluster
         CPos tc_00 = chambers.getInRegion(seed, 0, 0, rand);
-        if (tc_00.getX() > 2) return; // so that the other region is easier
         CPos ac_00 = city.getInRegion(seed, 0, 0, rand);
         if (!filterStructurePos(tc_00, ac_00))
+            return;
+
+        // filter positions for igloo near ac + tc and village nearby
+        CPos ig = igloo.getInRegion(seed, 0, 0, rand);
+        if (ig.distanceTo(CPos.ZERO, DistanceMetric.CHEBYSHEV) > 16)
+            return;
+        CPos vill = village.getInRegion(seed, 0, 0, rand);
+        if (vill.distanceTo(ig, DistanceMetric.MANHATTAN) >= 4)
             return;
 
         BPos cluster1 = getBedCluster(seed, tc_00);
         if (cluster1 == null)
             return;
 
-        // filter positions inside -1, 0 for arbitrary close trial chambers and ancient city
-        CPos tc_10 = chambers.getInRegion(seed, -1, 0, rand);
-        if (tc_10.distanceTo(tc_00, DistanceMetric.CHEBYSHEV) > 22)
-            return;
-        CPos ac_10 = city.getInRegion(seed, -1, 0, rand);
-        if (tc_10.distanceTo(ac_10, DistanceMetric.EUCLIDEAN) < 3 || tc_10.distanceTo(ac_10, DistanceMetric.EUCLIDEAN) > 7)
-            return;
+//        // filter positions inside -1, 0 for arbitrary close trial chambers and ancient city
+//        CPos tc_10 = chambers.getInRegion(seed, -1, 0, rand);
+//        if (tc_10.distanceTo(tc_00, DistanceMetric.CHEBYSHEV) > 22)
+//            return;
+//        CPos ac_10 = city.getInRegion(seed, -1, 0, rand);
+//        if (tc_10.distanceTo(ac_10, DistanceMetric.EUCLIDEAN) < 3 || tc_10.distanceTo(ac_10, DistanceMetric.EUCLIDEAN) > 7)
+//            return;
 
         // now comes the hard part. need to filter city layout for the hard cluster and just check if
         // two beds intersect any ancient city piece for the second one
@@ -155,35 +168,34 @@ public class HalfBedFinder {
         if (!correctLayout)
             return;
 
-        // generate both the second trial chambers and the second ancient city
-        tcgen.generate(seed, tc_10.getX(), tc_10.getZ(), rand);
-        acgen.generate(seed, ac_10.getX(), ac_10.getZ(), rand);
-
-        // check for beds intersecting tall ac pieces
-        List<TrialChambersPieces.Piece> beds = tcgen.getPieces().stream()
-                .filter(piece -> piece.getName().contains("bed"))
-                .toList();
-
-        int intersections = 0;
-        for (int i = 0; i < acgen.piecesLen; i++) {
-            var piece = acgen.pieces[i];
-            final String name = piece.getName();
-            if (name.equals("structures/tall_ruin_1") || name.equals("structures/tall_ruin_3") || name.contains("city_center")) {
-                for (TrialChambersPieces.Piece bed : beds) {
-                    if (bed.box.intersects(piece.box)) {
-                        intersections++;
-                    }
-                }
-            }
-        }
-
-        System.out.println("reached isection check: " + intersections + " for seed: " + seed);
-        if (intersections < 2)
-            return;
+//        // generate both the second trial chambers and the second ancient city
+//        tcgen.generate(seed, tc_10.getX(), tc_10.getZ(), rand);
+//        acgen.generate(seed, ac_10.getX(), ac_10.getZ(), rand);
+//
+//        // check for beds intersecting tall ac pieces
+//        List<TrialChambersPieces.Piece> beds = tcgen.getPieces().stream()
+//                .filter(piece -> piece.getName().contains("bed"))
+//                .toList();
+//
+//        int intersections = 0;
+//        for (int i = 0; i < acgen.piecesLen; i++) {
+//            var piece = acgen.pieces[i];
+//            final String name = piece.getName();
+//            if (name.equals("structures/tall_ruin_1") || name.equals("structures/tall_ruin_3") || name.contains("city_center")) {
+//                for (TrialChambersPieces.Piece bed : beds) {
+//                    if (bed.box.intersects(piece.box)) {
+//                        intersections++;
+//                    }
+//                }
+//            }
+//        }
+//
+//        System.out.println("reached isection check: " + intersections + " for seed: " + seed);
+//        if (intersections < 2)
+//            return;
 
         System.out.println("Found candidate seed: " + seed);
         System.out.println("Bed cluster: " + cluster1);
-        System.out.println("Second bed cluster: " + beds.get(0).box.getCenter());
         results.add(new Result(seed, tc_00, ac_00));
     }
 

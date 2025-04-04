@@ -57,7 +57,7 @@ public class SeedListTests {
         SeedList list1 = SeedList.fromFile("src/test/resources/test_seedlist_2A.txt", SeedList.EntryFormat.SEED, SeedList.EntryFormat.CHUNK_POS);
         SeedList list2 = SeedList.fromFile("src/test/resources/test_seedlist_2B.txt", SeedList.EntryFormat.SEED, SeedList.EntryFormat.INTEGER);
 
-        SeedList list3 = list1.filterSeeds(list2).flatten();
+        SeedList list3 = list1.filterSeeds(list2).toFlatList();
 
         assertEquals(3, list3.getEntries().size());
 

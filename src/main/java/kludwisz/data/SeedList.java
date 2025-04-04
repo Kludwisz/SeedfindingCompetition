@@ -73,7 +73,7 @@ public class SeedList {
      * Converts the SeedList to a flat SeedList, where each entry contains only the first seed.
      * @return a new SeedList with only the first seed in each entry.
      */
-    public SeedList flatten() {
+    public SeedList toFlatList() {
         SeedList result = new SeedList();
         for (Entry entry : this.entries) {
             result.addEntry(Collections.singletonList(entry.getSeed()));
@@ -100,6 +100,18 @@ public class SeedList {
             }
         }
 
+        return result;
+    }
+
+    public SeedList toFlatStructureSeedList() {
+        HashSet<Long> structureSeeds = new HashSet<>();
+        for (Entry entry : this.entries) {
+            structureSeeds.add(entry.getSeed() & 0xFFFF_FFFF_FFFFL);
+        }
+        SeedList result = new SeedList();
+        for (long seed : structureSeeds) {
+            result.addEntry(Collections.singletonList(seed));
+        }
         return result;
     }
 

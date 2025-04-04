@@ -23,24 +23,10 @@ public class Day4 {
         });
     }
 
-    public static void main(String[] args) {
+    public static void main3(String[] args) {
         final long taskSize = 1_000_000_000L;
 
-        List<Long> ss = List.of(2251518389664821737L & Mth.MASK_48, 29435511253L);
-        ss.forEach(r -> {
-            SeedList list = new SeedList();
-
-            LongStream.range(0L, 65536L)
-                    .map(upper -> (upper << 48) | r)
-                    .forEach(worldSeed -> list.addEntry(List.of(worldSeed)));
-
-            list.appendToFile("src/main/resources/day4_F.txt");
-        });
-
-        if (true)
-            return;
-
-        for (long task = 260L; task < 1000L; task++) {
+        for (long task = 0L; task < 1000L; task++) {
             System.out.println("running task " + task);
             List<HalfBedFinder.Result> results = HalfBedFinder.run2(task * taskSize, (task+1) * taskSize);
 
@@ -51,10 +37,31 @@ public class Day4 {
                         .map(upper -> (upper << 48) | r.structureSeed())
                         .forEach(worldSeed -> list.addEntry(List.of(worldSeed)));
 
-                list.appendToFile("src/main/resources/day4_E.txt");
+                list.appendToFile("src/main/resources/day4_igloo.txt");
             });
         }
     }
+
+    public static void main(String[] args) {
+        SeedList igloos = SeedList.fromFile("src/main/resources/day4_igloo.txt");
+        SeedList extIgloos = new SeedList();
+        igloos.toFlatStructureSeedList().getEntries().forEach(ent -> {
+            long structureSeed = ent.getSeed();
+            LongStream.range(0, 65536L).map(upper -> (upper << 48) | structureSeed).forEach(worldSeed -> {
+                extIgloos.addEntry(List.of(worldSeed));
+            });
+        });
+        extIgloos.toFile("src/main/resources/day4_igloo_ext.txt");
+    }
+
+//    public static void main(String [] args) {
+//        long ss = 78532210291632797L & Mth.MASK_48;
+//        SeedList list = new SeedList();
+//        LongStream.range(0L, 65536L)
+//                .map(upper -> (upper << 48) | ss)
+//                .forEach(worldSeed -> list.addEntry(List.of(worldSeed)));
+//        list.toFile("src/main/resources/day4_vill_test.txt");
+//    }
 
     // debug
 //    public static void main(String[] args) {
