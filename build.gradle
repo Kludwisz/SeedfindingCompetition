@@ -13,6 +13,11 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 dependencies {
     implementation('com.seedfinding:mc_math:1.171.0') { transitive = false }
     implementation('com.seedfinding:mc_seed:1.171.1') { transitive = false }

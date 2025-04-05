@@ -6,6 +6,7 @@ import com.seedfinding.mccore.util.pos.CPos;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.stream.LongStream;
 
 @SuppressWarnings("unused")
 public class SeedList {
@@ -193,6 +194,19 @@ public class SeedList {
     public boolean appendToFile(String s) {
         return toFile(s, true);
     }
+
+    public void addSisterSeedsOf(long structureSeed, int sisterSeedCount) {
+        if (this.formatSequence.size() != 1 || this.formatSequence.get(0) != EntryFormat.SEED) {
+            throw new IllegalArgumentException("Cannot add sister seeds to a non-flat SeedList");
+        }
+
+        LongStream.range(1, sisterSeedCount+1).forEach(i -> {
+            long seed = (i << 48) | structureSeed;
+            this.addEntry(Collections.singletonList(seed));
+        });
+    }
+
+    public SeedList
 
 
     // ----------------------------------------------------------------------------------
