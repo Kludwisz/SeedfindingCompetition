@@ -9,9 +9,13 @@ import com.seedfinding.mccore.util.pos.RPos;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.structure.Mineshaft;
 import kludwisz.ancientcity.AncientCity;
+import kludwisz.ancientcity.AncientCityGenerator;
 import kludwisz.data.SeedList;
+import kludwisz.generator.TrialChambersGenerator;
+import kludwisz.mineshafts.MineshaftLoot;
 import kludwisz.structure.TrialChambers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StructureClusterFinder implements Runnable {
@@ -21,7 +25,8 @@ public class StructureClusterFinder implements Runnable {
     private static final MCVersion VERSION = MCVersion.v1_21;
     private static final DistanceMetric CHEBYSHEV = DistanceMetric.CHEBYSHEV;
     private static final DistanceMetric MANHATTAN = DistanceMetric.MANHATTAN;
-    private static final int MIN_SHAFTS = 3;
+    private static final int MIN_SHAFTS = 2;
+    private static final int MIN_SPAWNERS = 3;
 
     private final ChunkRand rand = new ChunkRand();
     private final AncientCity ancientCity;
@@ -48,14 +53,15 @@ public class StructureClusterFinder implements Runnable {
             addResultToFiles(res);
         }
 
-        System.out.printf("Task %d -- %d finished.", rangeStart, rangeEnd);
+        System.out.printf("Task %d -- %d finished.\n", rangeStart, rangeEnd);
     }
 
     private synchronized void addResultToFiles(Result res) {
+        System.out.println("Got a result: " + res);
         SeedList oneResult = new SeedList(SeedList.EntryFormat.SEED, SeedList.EntryFormat.CHUNK_POS);
         oneResult.addEntry(List.of(res.seed(), (long)res.pos().getX(), (long)res.pos().getZ()));
         oneResult.appendToFile(FULL_RESULTS_FILENAME);
-        oneResult.toFlatList().appendToFile(SEED_RESULTS_FILENAME);
+        oneResult.toFlatStructureSeedList().extendWithSisterSeeds(16000).appendToFile(SEED_RESULTS_FILENAME);
     }
 
     // ---------------------------------------------------------------------
@@ -84,11 +90,11 @@ public class StructureClusterFinder implements Runnable {
             Vec3i rot = rand.getRandom(BlockRotation.values()).getDirection().getVector();
             CPos center = new CPos(tc.getX() + rot.getX() * 2, tc.getZ() + rot.getZ() * 2);
             if (center.distanceTo(ac, CHEBYSHEV) > 2) continue;
-            int mineshaftCount = getMineshaftsAround(worldseed, center);
-            if (mineshaftCount < MIN_SHAFTS) continue;
+            List<CPos> shafts = getMineshaftsAround(worldseed, center);
+            if (shafts.size() < MIN_SHAFTS) continue;
 
             // check layout-specific parameters (requires access to critical section)
-            if (!StructureClusterFinder.layoutCheck(worldseed, tc, ac, rand))
+            if (!StructureClusterFinder.layoutCheck(worldseed, tc, ac, shafts, rand))
                 continue;
 
             return new Result(worldseed, center);
@@ -97,24 +103,45 @@ public class StructureClusterFinder implements Runnable {
         return null;
     }
 
-    private int getMineshaftsAround(long worldseed, CPos sh) {
+    private List<CPos> getMineshaftsAround(long worldseed, CPos pos) {
         // offset by 2 chunks in each direction from stronghold
-        int mineshafts = 0;
+        ArrayList<CPos> ms = new ArrayList<>();
 
         for (int dcx = -3; dcx <= 3; dcx++) {
             for (int dcz = -3; dcz <= 3; dcz++) {
-                if (mineshaft.canStart(mineshaft.at(sh.getX() + dcx, sh.getZ() + dcz), worldseed, rand))
-                    mineshafts++;
+                if (mineshaft.canStart(mineshaft.at(pos.getX() + dcx, pos.getZ() + dcz), worldseed, rand))
+                    ms.add(new CPos(pos.getX() + dcx, pos.getZ() + dcz));
             }
         }
 
-        return mineshafts;
+        return ms;
     }
 
     // critical section, uses non-thread-safe structure generators
-    private static synchronized boolean layoutCheck(long worldseed, CPos tc, CPos ac, ChunkRand rand) {
+    private static final TrialChambersGenerator tcgen = new TrialChambersGenerator();
+    private static final AncientCityGenerator acgen = new AncientCityGenerator();
+    private static final MineshaftLoot mgen = new MineshaftLoot(VERSION);
 
-        return true;
+    private static synchronized boolean layoutCheck(long worldseed, CPos tc, CPos ac, List<CPos> mineshafts, ChunkRand rand) {
+        tcgen.generate(worldseed, tc.getX(), tc.getZ(), rand);
+        var atriumPiece = tcgen.getPieces().stream().filter(p -> p.getName().equals("corridor/atrium_1")).toList();
+        if (atriumPiece.isEmpty())
+            return false;
+
+        long spawners = 0L;
+        for (CPos ms : mineshafts) {
+            mgen.generateMineshaft(worldseed, ms, false);
+            spawners += mgen.getCorridors().stream()
+                    .filter(c -> c.hasCobwebs)
+                    .filter(c -> atriumPiece.get(0).box.contains(c.boundingBox.getCenter()))
+                    .count();
+        }
+        if (spawners < (long)MIN_SPAWNERS)
+            return false;
+
+        acgen.generate(worldseed, ac.getX(), ac.getZ(), rand);
+        var centerPiece = acgen.pieces[0];
+        return centerPiece.box.intersects(atriumPiece.get(0).box);
     }
 
     // ---------------------------------------------------------------------

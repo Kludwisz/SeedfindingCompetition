@@ -2,6 +2,7 @@ package kludwisz.data;
 
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
+import com.seedfinding.mcmath.util.Mth;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -116,6 +117,28 @@ public class SeedList {
         return result;
     }
 
+    public void addSisterSeedsOf(long structureSeed, int sisterSeedCount) {
+        if (this.formatSequence.size() != 1 || this.formatSequence.get(0) != EntryFormat.SEED) {
+            throw new IllegalArgumentException("Cannot add sister seeds to a non-flat SeedList");
+        }
+
+        LongStream.range(1, sisterSeedCount+1).forEach(i -> {
+            long seed = (i << 48) | structureSeed;
+            this.addEntry(Collections.singletonList(seed));
+        });
+    }
+
+    public SeedList extendWithSisterSeeds(int sisterSeedCount) {
+        if (this.formatSequence.size() != 1 || this.formatSequence.get(0) != EntryFormat.SEED) {
+            throw new IllegalArgumentException("Cannot add sister seeds to a non-flat SeedList");
+        }
+
+        SeedList result = new SeedList();
+        for (Entry entry : this.entries)
+            result.addSisterSeedsOf(entry.getSeed() & Mth.MASK_48, sisterSeedCount);
+        return result;
+    }
+
     // ----------------------------------------------------------------------------------
 
     /**
@@ -194,20 +217,6 @@ public class SeedList {
     public boolean appendToFile(String s) {
         return toFile(s, true);
     }
-
-    public void addSisterSeedsOf(long structureSeed, int sisterSeedCount) {
-        if (this.formatSequence.size() != 1 || this.formatSequence.get(0) != EntryFormat.SEED) {
-            throw new IllegalArgumentException("Cannot add sister seeds to a non-flat SeedList");
-        }
-
-        LongStream.range(1, sisterSeedCount+1).forEach(i -> {
-            long seed = (i << 48) | structureSeed;
-            this.addEntry(Collections.singletonList(seed));
-        });
-    }
-
-    public SeedList
-
 
     // ----------------------------------------------------------------------------------
 

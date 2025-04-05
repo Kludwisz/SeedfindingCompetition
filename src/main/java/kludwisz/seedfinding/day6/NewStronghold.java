@@ -9,8 +9,8 @@ public class NewStronghold {
     private final Stronghold stronghold = new Stronghold(MCVersion.v1_21);
 
     public CPos[] getFirstRingApproxStarts(long worldseed, JRand rand) {
-        final int distance = stronghold.getDistance();
-        final int numberPerRing = stronghold.getSpread();
+        final int distance = 32;
+        final int numberPerRing = 3;
         final int count = 3;
 
         CPos[] starts = new CPos[count];

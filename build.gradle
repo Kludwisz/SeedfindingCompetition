@@ -29,6 +29,8 @@ dependencies {
     implementation('com.seedfinding:mc_reversal:1.171.1') { transitive = false }
     implementation('com.seedfinding:mc_feature:1.171.9') { transitive = false }
 
+    implementation 'com.seedfinding:latticg:1.07@jar'
+
     implementation group: 'it.unimi.dsi', name: 'fastutil-core', version: '8.5.13'
 
     implementation('com.github.kludwisz:MineshaftLoot:1.6') { transitive = false }
