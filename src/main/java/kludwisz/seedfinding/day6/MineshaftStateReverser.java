@@ -7,16 +7,19 @@ import com.seedfinding.mccore.rand.ChunkRand;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcreversal.ChunkRandomReverser;
 
+
 public class MineshaftStateReverser {
+    private static final ChunkRand rand = new ChunkRand();
+
     public static void main(String[] args) {
-        // 260676566349164
-        //carverToStructseed(260676566349164L);
-        //runlatti();
+//        runlatti();
 
-//        78333037866579
-//        233985236196149
-//        280238318665164
+//        //260676566349164
+//        carverToStructseed(260676566349164L);
 
+//        //78333037866579
+//        //233985236196149
+//        //280238318665164
 //        carverToStructseed(78333037866579L);
 //        carverToStructseed(233985236196149L);
 //        carverToStructseed(280238318665164L);
@@ -52,6 +55,12 @@ public class MineshaftStateReverser {
         }
     }
 
+    /**
+     * This is the initial attempt of finding Mineshaft carver seeds using the LattiCG library.
+     * As it turned out, we needed a much more common seed than the ones found via LattiCG, and
+     * so we switched to a CUDA bruteforce approach, greatly reducing code runtime.
+     */
+    @Deprecated
     public static void runlatti() {
         int consecutiveCount = 5;
         DynamicProgram device = DynamicProgram.create(LCG.JAVA);
@@ -74,10 +83,12 @@ public class MineshaftStateReverser {
             if (test(carver, consecutiveCount))
                 System.out.println(carver);
         });
-
     }
 
-    private static final ChunkRand rand = new ChunkRand();
+    /**
+     * Forward-checks a carver seed to see if it generates the target number of consecutive spider corridors.
+     */
+    @Deprecated
     private static boolean test(long carverseed, int consecutiveCount) {
         rand.setSeed(carverseed);
         if (rand.nextDouble() >= 0.004D) return false;
@@ -90,12 +101,16 @@ public class MineshaftStateReverser {
             if (rand.nextInt(3) == 0) return false;
             if (rand.nextInt(23) != 0) return false;
             if (rand.nextInt(4) > 1) return false;
-            rand.advance(1); // height
+            rand.advance(1); // height offset doesn't matter
         }
 
         return true;
     }
 
+    /**
+     * Reverses the given carver seed to the first found worldseed that generate a chunk with that carver near 0,0.
+     * This is actually overkill because the structure seed "carverSeed" always has that carver seed in chunk (0,0).
+     */
     private static void carverToStructseed(long carver) {
         for (int cx=-2; cx<=2; cx++) for (int cz=-2; cz<=2; cz++){
             for (long worldseed : ChunkRandomReverser.reverseCarverSeed(carver, cx, cz, MCVersion.v1_16_1)) {

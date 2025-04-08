@@ -25,6 +25,7 @@ import java.util.List;
  * - MineshaftStateReverser.java
  * - CorridorFinder.java
  */
+@Deprecated
 public class StructureClusterFinder implements Runnable {
     public static final String FULL_RESULTS_FILENAME = "src/main/resources/day6_full.txt";
     public static final String SEED_RESULTS_FILENAME = "src/main/resources/day6_seeds.txt";
