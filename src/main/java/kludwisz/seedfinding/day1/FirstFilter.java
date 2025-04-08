@@ -4,7 +4,6 @@ import com.seedfinding.mccore.rand.ChunkRand;
 import com.seedfinding.mccore.util.block.BlockBox;
 import com.seedfinding.mccore.util.block.BlockRotation;
 import com.seedfinding.mccore.util.data.Pair;
-import com.seedfinding.mccore.util.math.DistanceMetric;
 import com.seedfinding.mccore.util.math.Vec3i;
 import com.seedfinding.mccore.util.pos.BPos;
 import com.seedfinding.mccore.util.pos.CPos;
@@ -17,6 +16,7 @@ import kludwisz.structure.TrialChambers;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class FirstFilter implements Runnable {
     private final long worldseed;

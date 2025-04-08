@@ -1,13 +1,9 @@
 package kludwisz.seedfinding.day6;
 
 import com.seedfinding.mccore.util.pos.CPos;
-import com.seedfinding.mccore.version.MCVersion;
-import com.seedfinding.mcfeature.structure.Stronghold;
 import com.seedfinding.mcseed.rand.JRand;
 
 public class NewStronghold {
-    private final Stronghold stronghold = new Stronghold(MCVersion.v1_21);
-
     public CPos[] getFirstRingApproxStarts(long worldseed, JRand rand) {
         final int distance = 32;
         final int numberPerRing = 3;

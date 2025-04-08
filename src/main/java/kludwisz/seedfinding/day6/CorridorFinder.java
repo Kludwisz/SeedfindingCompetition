@@ -1,7 +1,6 @@
 package kludwisz.seedfinding.day6;
 
 import com.seedfinding.mccore.rand.ChunkRand;
-import com.seedfinding.mccore.util.block.BlockRotation;
 import com.seedfinding.mccore.util.math.DistanceMetric;
 import com.seedfinding.mccore.util.pos.CPos;
 import com.seedfinding.mccore.util.pos.RPos;
@@ -14,6 +13,7 @@ import kludwisz.mineshafts.MineshaftLoot;
 import kludwisz.structure.TrialChambers;
 
 import java.util.ArrayList;
+
 
 public class CorridorFinder {
     //private static final long carverSeed = 280238318665164L; // mineshaft with 5 spider corridors going 50 blocks -z

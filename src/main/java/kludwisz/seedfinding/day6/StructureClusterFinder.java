@@ -18,6 +18,13 @@ import kludwisz.structure.TrialChambers;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This was our original idea for round 6 of the seedfinding competition - finding
+ * large clusters of underground structures. Later on, we came up with a much more
+ * unique & fun idea, which you can find the implementation of in the files:
+ * - MineshaftStateReverser.java
+ * - CorridorFinder.java
+ */
 public class StructureClusterFinder implements Runnable {
     public static final String FULL_RESULTS_FILENAME = "src/main/resources/day6_full.txt";
     public static final String SEED_RESULTS_FILENAME = "src/main/resources/day6_seeds.txt";
@@ -66,6 +73,10 @@ public class StructureClusterFinder implements Runnable {
 
     // ---------------------------------------------------------------------
 
+    /**
+     * Checks if the given worldseed has a valid structure cluster.
+     * @return a Result object containing the worldseed and the center of the cluster, or null if no valid cluster was found.
+     */
     private Result check(long worldseed) {
         // find first ring strongholds,
         // find ancient city and trial chamber in the corresponding region(s)
@@ -75,23 +86,26 @@ public class StructureClusterFinder implements Runnable {
         CPos[] firstRingSH = stronghold.getFirstRingApproxStarts(worldseed, rand);
 
         for (CPos sh : firstRingSH) {
+            // firstly, check if the initial stronghold position is close enough to a trial chambers and an ancient city
             RPos tcRegion = sh.toRegionPos(trialChambers.getSpacing());
             CPos tc = trialChambers.getInRegion(worldseed, tcRegion.getX(), tcRegion.getZ(), rand);
 
             RPos acRegion = sh.toRegionPos(ancientCity.getSpacing());
             CPos ac = ancientCity.getInRegion(worldseed, acRegion.getX(), acRegion.getZ(), rand);
-            if (ac.distanceTo(tc, CHEBYSHEV) > 3 || ac.distanceTo(tc, MANHATTAN) <= 3) continue; // too close = no tc
+            if (ac.distanceTo(tc, CHEBYSHEV) > 3 || ac.distanceTo(tc, MANHATTAN) <= 3) continue; // too close = bad TC biome
             if (ac.distanceTo(sh, CHEBYSHEV) > 3 || tc.distanceTo(sh, CHEBYSHEV) > 3) continue;
 
             // got good cluster of ancient city, trial chambers, and (potentially) stronghold
 
+            // find the chunk position of the trial chambers' central intersection piece
             rand.setCarverSeed(worldseed, tc.getX(), tc.getZ(), VERSION);
             rand.nextInt(21); // y value
             Vec3i rot = rand.getRandom(BlockRotation.values()).getDirection().getVector();
             CPos center = new CPos(tc.getX() + rot.getX() * 2, tc.getZ() + rot.getZ() * 2);
-            if (center.distanceTo(ac, CHEBYSHEV) > 2) continue;
+            if (center.distanceTo(ac, CHEBYSHEV) > 2) continue; // want the center to be close to the ancient city
+
             List<CPos> shafts = getMineshaftsAround(worldseed, center);
-            if (shafts.size() < MIN_SHAFTS) continue;
+            if (shafts.size() < MIN_SHAFTS) continue; // requiring at least MIN_SHAFTS mineshafts
 
             // check layout-specific parameters (requires access to critical section)
             if (!StructureClusterFinder.layoutCheck(worldseed, tc, ac, shafts, rand))
@@ -103,8 +117,10 @@ public class StructureClusterFinder implements Runnable {
         return null;
     }
 
+    /**
+     * Returns a list of mineshafts that generate in a 7x7 chunk area around the given position (pos) on the given seed.
+     */
     private List<CPos> getMineshaftsAround(long worldseed, CPos pos) {
-        // offset by 2 chunks in each direction from stronghold
         ArrayList<CPos> ms = new ArrayList<>();
 
         for (int dcx = -3; dcx <= 3; dcx++) {
@@ -117,16 +133,22 @@ public class StructureClusterFinder implements Runnable {
         return ms;
     }
 
-    // critical section, uses non-thread-safe structure generators
+
     private static final TrialChambersGenerator tcgen = new TrialChambersGenerator();
     private static final AncientCityGenerator acgen = new AncientCityGenerator();
     private static final MineshaftLoot mgen = new MineshaftLoot(VERSION);
 
+    /**
+     * Checks if the generated trial chambers structure intersects with the central ancient city piece,
+     * and if the generated mineshafts produce at least MIN_SPAWNERS spider spawners inside the
+     * trial chambers' atrium.
+     */
     private static synchronized boolean layoutCheck(long worldseed, CPos tc, CPos ac, List<CPos> mineshafts, ChunkRand rand) {
+        // critical section, uses non-thread-safe structure generators
         tcgen.generate(worldseed, tc.getX(), tc.getZ(), rand);
         var atriumPiece = tcgen.getPieces().stream().filter(p -> p.getName().equals("corridor/atrium_1")).toList();
         if (atriumPiece.isEmpty())
-            return false;
+            return false; // should never happen
 
         long spawners = 0L;
         for (CPos ms : mineshafts) {
@@ -137,7 +159,7 @@ public class StructureClusterFinder implements Runnable {
                     .count();
         }
         if (spawners < (long)MIN_SPAWNERS)
-            return false;
+            return false; // not enough spawners
 
         acgen.generate(worldseed, ac.getX(), ac.getZ(), rand);
         var centerPiece = acgen.pieces[0];
