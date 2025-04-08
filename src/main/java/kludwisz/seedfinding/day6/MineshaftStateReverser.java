@@ -7,7 +7,11 @@ import com.seedfinding.mccore.rand.ChunkRand;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcreversal.ChunkRandomReverser;
 
-
+/**
+ * This part of the code was first intended to find the carver seed to use in the main program,
+ * but was ultimately abandoned in favor of the CUDA bruteforce approach.
+ */
+@Deprecated
 public class MineshaftStateReverser {
     private static final ChunkRand rand = new ChunkRand();
 
@@ -60,7 +64,6 @@ public class MineshaftStateReverser {
      * As it turned out, we needed a much more common seed than the ones found via LattiCG, and
      * so we switched to a CUDA bruteforce approach, greatly reducing code runtime.
      */
-    @Deprecated
     public static void runlatti() {
         int consecutiveCount = 5;
         DynamicProgram device = DynamicProgram.create(LCG.JAVA);
@@ -88,7 +91,6 @@ public class MineshaftStateReverser {
     /**
      * Forward-checks a carver seed to see if it generates the target number of consecutive spider corridors.
      */
-    @Deprecated
     private static boolean test(long carverseed, int consecutiveCount) {
         rand.setSeed(carverseed);
         if (rand.nextDouble() >= 0.004D) return false;
