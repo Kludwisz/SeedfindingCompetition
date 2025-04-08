@@ -5,7 +5,10 @@ import com.seedfinding.mccore.util.pos.BPos;
 
 import java.util.EnumMap;
 
-
+/**
+ * A utility class to store the vectors of centers of Trial Chambers bed clusters.
+ * All the data was gathered in-game using the commented-out main method which you can find below.
+ */
 public class BedVectors {
     public static final EnumMap<BlockRotation, BPos> VECS = new EnumMap<>(BlockRotation.class);
 

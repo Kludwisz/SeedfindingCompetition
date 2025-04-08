@@ -8,7 +8,12 @@ import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcreversal.ChunkRandomReverser;
 import kludwisz.structure.TrialChambers;
 
-
+/**
+ * The main class for round 6 of the seedfinding competition. The task was to find
+ * any cool/unique/rare Minecraft seed, and we (M33_Galaxy, Zennith, and Kris) decided
+ * to try to find an intersection of serveral connected Mineshaft spider corridors
+ * with the main corridor inside a Trial Chambers structure.
+ */
 public class CorridorFinder {
     // (unused carver seed)
     // mineshaft with 5 spider corridors going 50 blocks -z
