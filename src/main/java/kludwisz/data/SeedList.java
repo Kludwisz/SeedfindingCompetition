@@ -9,6 +9,11 @@ import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.LongStream;
 
+/**
+ * A class that represents a list of seeds and their associated parameters. These parameters
+ * can be chunk positions, block positions, or simple integers. The class allows for easy
+ * manipulation of the list, including filtering, file i/o, and operations specific to seedfinding.
+ */
 @SuppressWarnings("unused")
 public class SeedList {
     private final ArrayList<Entry> entries = new ArrayList<>();
@@ -69,6 +74,13 @@ public class SeedList {
         this.entries.add(new Entry(entry));
     }
 
+    /**
+     * @return whether the SeedList is flat (only contains one seed per entry, no extra parameters)
+     */
+    public boolean isFlat() {
+        return this.formatSequence.size() == 1 && this.formatSequence.get(0) == EntryFormat.SEED;
+    }
+
     // ----------------------------------------------------------------------------------
 
     /**
@@ -105,6 +117,10 @@ public class SeedList {
         return result;
     }
 
+    /**
+     * Converts the SeedList to a flat SeedList of unique lower 48 bit seeds (structure seeds).
+     * @return a new flat SeedList of unique lower 48 bit seeds in the current list.
+     */
     public SeedList toFlatStructureSeedList() {
         HashSet<Long> structureSeeds = new HashSet<>();
         for (Entry entry : this.entries) {
@@ -117,6 +133,11 @@ public class SeedList {
         return result;
     }
 
+    /**
+     * Adds sister seeds of a given structure seed to the SeedList (requires a flat SeedList).
+     * @param structureSeed the structure seed to add sister seeds of.
+     * @param sisterSeedCount the number of sister seeds to add for each structure seed.
+     */
     public void addSisterSeedsOf(long structureSeed, int sisterSeedCount) {
         if (this.formatSequence.size() != 1 || this.formatSequence.get(0) != EntryFormat.SEED) {
             throw new IllegalArgumentException("Cannot add sister seeds to a non-flat SeedList");
@@ -128,6 +149,11 @@ public class SeedList {
         });
     }
 
+    /**
+     * Creates a new flat SeedList from the current flat SeedList in which each seed is replaced by
+     * a specified number of its sister seeds.
+     * @param sisterSeedCount the number of sister seeds to add for each structure seed.
+     */
     public SeedList extendWithSisterSeeds(int sisterSeedCount) {
         if (this.formatSequence.size() != 1 || this.formatSequence.get(0) != EntryFormat.SEED) {
             throw new IllegalArgumentException("Cannot add sister seeds to a non-flat SeedList");
@@ -188,8 +214,9 @@ public class SeedList {
     }
 
     /**
-     * Writes the SeedList to the given file. Deletes the previous contents of the file.
+     * Writes or appends the SeedList to the given file.
      * @param filename the name of the file to write to.
+     * @param append whether to append to the file or overwrite it.
      * @return true if the operation was successful, false otherwise.
      */
     public boolean toFile(String filename, boolean append) {
@@ -210,10 +237,20 @@ public class SeedList {
         return false;
     }
 
+    /**
+     * Writes the SeedList to the given file. Deletes the previous contents of the file.
+     * @param filename the name of the file to write to.
+     * @return true if the operation was successful, false otherwise.
+     */
     public boolean toFile(String filename) {
         return toFile(filename, false);
     }
 
+    /**
+     * Appends the SeedList to the given file.
+     * @param s the string to append to the file.
+     * @return true if the operation was successful, false otherwise.
+     */
     public boolean appendToFile(String s) {
         return toFile(s, true);
     }
@@ -273,6 +310,16 @@ public class SeedList {
          */
         public Entry(List<Long> values) {
             this.values = values;
+        }
+
+        /**
+         * Constructs a new Entry with the given values.
+         */
+        public Entry(long... values) {
+            this.values = new ArrayList<>();
+            for (long value : values) {
+                this.values.add(value);
+            }
         }
 
         /**

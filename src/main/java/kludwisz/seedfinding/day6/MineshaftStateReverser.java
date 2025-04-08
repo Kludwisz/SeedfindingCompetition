@@ -17,9 +17,37 @@ public class MineshaftStateReverser {
 //        233985236196149
 //        280238318665164
 
-        carverToStructseed(78333037866579L);
-        carverToStructseed(233985236196149L);
-        carverToStructseed(280238318665164L);
+//        carverToStructseed(78333037866579L);
+//        carverToStructseed(233985236196149L);
+//        carverToStructseed(280238318665164L);
+
+        // x = 9 with tc going -z (north) or x = 7 with tc going +z (south)
+        long[] seeds = {184792755286472L,
+        56796013046194L,
+        209228314985727L,
+        105138984772094L,
+        196915658364540L,
+        97673312491187L,
+        220600925108411L,
+        214846931305250L,
+        224259084761669L,
+        175418686875215L,
+        195484993842107L,
+        112003835668481L,
+        15968538881165L,
+        23830961987130L,
+        132954291726523L,
+        128168016663458L,
+        143319963638928L,
+        14549237075009L,
+        157931018468964L,
+        135991633058154L,
+        24491911484857L,
+        235759564352031L};
+
+        for (long seed : seeds) {
+            carverToStructseed(seed);
+        }
     }
 
     public static void runlatti() {
@@ -67,7 +95,7 @@ public class MineshaftStateReverser {
     }
 
     private static void carverToStructseed(long carver) {
-        for (int cx=-4; cx<=4; cx++) for (int cz=-4; cz<=4; cz++){
+        for (int cx=-2; cx<=2; cx++) for (int cz=-2; cz<=2; cz++){
             for (long worldseed : ChunkRandomReverser.reverseCarverSeed(carver, cx, cz, MCVersion.v1_16_1)) {
                 System.out.println(worldseed);
                 return;
