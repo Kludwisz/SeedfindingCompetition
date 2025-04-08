@@ -17,7 +17,11 @@ import kludwisz.structure.TrialChambers;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * The first filter was created to only check for the possibility of getting
+ * a good arrangement of minecart chests in a region. It doesn't account for
+ * any Trial Chamber layout parameters, and only generates the Mineshafts.
+ */
 public class FirstFilter implements Runnable {
     private final long worldseed;
     private final RPos regionMin;
@@ -54,6 +58,11 @@ public class FirstFilter implements Runnable {
     private final TrialChambersGenerator tcgen = new TrialChambersGenerator();
     private final MineshaftLoot mgen = new MineshaftLoot(version);
 
+    /**
+     * Tests if the given region could generate a two-stack of minecart chests.
+     * @param regionX the trial chambers region X coordinate
+     * @param regionZ the trial chambers region Z coordinate
+     */
     private boolean testRegion(int regionX, int regionZ) {
         CPos chambers = TC.getInRegion(worldseed, regionX, regionZ, rand);
         rand.setCarverSeed(worldseed, chambers.getX(), chambers.getZ(), version);
@@ -111,6 +120,12 @@ public class FirstFilter implements Runnable {
         return false;
     }
 
+    /**
+     * This method turned out to be a dead end.
+     * Tests if the given region could generate a 3-cluster of minecart chests.
+     * @param regionX the trial chambers region X coordinate
+     * @param regionZ the trial chambers region Z coordinate
+     */
     private BPos testRegion2(int regionX, int regionZ) {
         CPos chambers = TC.getInRegion(worldseed, regionX, regionZ, rand);
 

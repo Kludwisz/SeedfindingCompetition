@@ -2,6 +2,9 @@ package kludwisz.seedfinding.day1;
 
 import java.util.ArrayList;
 
+/**
+ * A shared resource for collecting results from multiple threads.
+ */
 public class ResultCollector {
     public static final ArrayList<FirstFilter.Result> results = new ArrayList<>();
     public static final ArrayList<FirstFilter.Result2> results2 = new ArrayList<>();

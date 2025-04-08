@@ -1,11 +1,7 @@
 package kludwisz.seedfinding.day1;
 
-import com.seedfinding.mccore.rand.ChunkRand;
-import com.seedfinding.mccore.util.block.BlockRotation;
-import com.seedfinding.mccore.util.math.Vec3i;
 import com.seedfinding.mccore.util.pos.CPos;
 import com.seedfinding.mccore.util.pos.RPos;
-import com.seedfinding.mccore.version.MCVersion;
 import kludwisz.data.SeedList;
 
 import java.util.List;
@@ -13,11 +9,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Entry points for the code I used to find my submission for day 1 of the competition.
+ * The task was to find the coolest/rarest feature on a given seed: -6583981180238954485.
+ * I decided to find a seed that generates a bunch of minecart chests near an interset point
+ * inside a Trial Chambers structure (spawner or vault). This worked out pretty well in the
+ * end, but I encountered some dead ends along the way, hence the multiple entry points.
+ */
 public class Day1 {
     public static final long seed = -6583981180238954485L;
     public static final AtomicInteger completed = new AtomicInteger(0);
 
-    public static void mainFirst(String[] args) {
+    /**
+     * The very first (and ultimately best) attempt at finding a submission.
+     */
+    public static void main(String[] args) {
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
         int globalRegionMin = -30_000_000 / 16 / 34;
@@ -57,7 +63,10 @@ public class Day1 {
         //ResultCollector.getResults().forEach(System.out::println); // precaution
     }
 
-    public static void main4(String[] args) {
+    /**
+     * The second attempt that aimed (and failed) to explicitly find 3-chest clusters
+     */
+    public static void main_attempt2() {
         ExecutorService executor = Executors.newFixedThreadPool(8);
 
         int globalRegionMin = -30_000_000 / 16 / 34;
@@ -97,22 +106,12 @@ public class Day1 {
         //ResultCollector.getResults().forEach(System.out::println); // precaution
     }
 
-
-
-    public static void test(String[] args) {
-        long worldseed = 123L;
-        ChunkRand rand = new ChunkRand();
-        CPos chambers = new CPos(14, 11);
-        rand.setCarverSeed(worldseed, chambers.getX(), chambers.getZ(), MCVersion.v1_21);
-        rand.nextInt(21); // y value
-        Vec3i startPieceRotationVector = rand.getRandom(BlockRotation.values()).getDirection().getVector();
-        CPos center = new CPos(chambers.getX() + 2 * startPieceRotationVector.getX(), chambers.getZ() + 2 * startPieceRotationVector.getZ());
-        System.out.println(center);
-    }
-
-
-
-    public static void main(String[] args) {
+    /**
+     * The third attempt in which I tried to make use of multiple Mineshafts. This also
+     * failed, as it turned out that the decorator-seeded PRNG doesn't get reset on a
+     * per-structure-start basis, but rather per structure type.
+     */
+    public static void main_attempt3() {
         SeedList list = SeedList.fromFile("src/main/resources/day1_final.txt", SeedList.EntryFormat.CHUNK_POS);
         System.out.println("Loaded " + list.getEntries().size() + " entries.");
         SecondFilter filter2 = new SecondFilter(seed);

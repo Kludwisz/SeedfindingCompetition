@@ -25,9 +25,13 @@ import java.util.List;
 // /tp @p -7243315 -33 -9898617
 // /tp @s -7243306.5 -34.0 -9898616.5 90.0 -18.0
 
-// also good:
+// also good (2 chests right on top of a spawner):
 // /tp @p 17958840 0 -6624116
 
+/**
+ * Generates the Trial Chambers structure and checks, if a cluster of minecart chests generates
+ * near an interest point inside the structure.
+ */
 public class SecondFilter {
     private final long worldseed;
     private final NoiseSampler sampler;
@@ -45,6 +49,10 @@ public class SecondFilter {
     private final TrialChambersGenerator tcgen = new TrialChambersGenerator();
     private final MineshaftLoot mgen = new MineshaftLoot(version);
 
+    /**
+     * Generates the Trial Chambers structure and checks, if a cluster of minecart chests generates
+     * near an interest point inside the structure.
+     */
     public void testPos(RPos region) {
         // gen trial chambers
         CPos chambers = TC.getInRegion(worldseed, region.getX(), region.getZ(), rand);
